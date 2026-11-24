@@ -8,6 +8,7 @@ import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -18,9 +19,11 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        try (InputStreamReader reader = new InputStreamReader(
-                ClassLoader.getSystemResourceAsStream(fileNameProvider.getTestFileName()),
-                StandardCharsets.UTF_8)) {
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream(fileNameProvider.getTestFileName());
+        if (inputStream == null) {
+            throw new QuestionReadException("Resource not found: " + fileNameProvider.getTestFileName());
+        }
+        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
                     .withType(QuestionDto.class)
                     .withSkipLines(1)
