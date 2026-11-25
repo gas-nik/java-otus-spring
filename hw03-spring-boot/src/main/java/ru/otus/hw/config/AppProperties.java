@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import ru.otus.hw.exceptions.QuestionReadException;
 
 import java.util.Locale;
 import java.util.Map;
@@ -27,6 +28,12 @@ public class AppProperties implements TestConfig, TestFileNameProvider, LocaleCo
 
     @Override
     public String getTestFileName() {
-        return fileNameByLocaleTag.get(locale.toLanguageTag());
+        String languageTag = locale.toLanguageTag();
+        String fileName = fileNameByLocaleTag.get(languageTag);
+        if (fileName == null) {
+            throw new QuestionReadException(
+                    "No questions file configured for locale: " + languageTag);
+        }
+        return fileName;
     }
 }
